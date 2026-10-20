@@ -1,0 +1,26 @@
+# Archivos generados por Maven y Ant
+/target/
+/bin/
+/BlackJack.jar
+*.class
+
+# Datos locales de jqwik
+.jqwik-database
+.jqwik-database.*
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# macOS
+.DS_Store
+._*
+
+# Registros de errores de Java
+hs_err_pid*
+replay_pid*
