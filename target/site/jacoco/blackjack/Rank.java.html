@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Rank.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">blackjack-validation</a> &gt; <a href="index.source.html" class="el_package">blackjack</a> &gt; <span class="el_source">Rank.java</span></div><h1>Rank.java</h1><pre class="source lang-java linenums">package blackjack;
+
+/**
+ * This enum defines Rank of card.
+ * 
+ * @author Janusz Slawek
+ * 
+ */
+<span class="fc" id="L9">public enum Rank {</span>
+	/**
+	 * Field TWO.
+	 */
+<span class="fc" id="L13">	TWO(0, &quot;2&quot;), /**</span>
+	 * Field THREE.
+	 */
+<span class="fc" id="L16">	THREE(1, &quot;3&quot;), /**</span>
+	 * Field FOUR.
+	 */
+<span class="fc" id="L19">	FOUR(2, &quot;4&quot;), /**</span>
+	 * Field FIVE.
+	 */
+<span class="fc" id="L22">	FIVE(3, &quot;5&quot;), /**</span>
+	 * Field SIX.
+	 */
+<span class="fc" id="L25">	SIX(4, &quot;6&quot;), /**</span>
+	 * Field SEVEN.
+	 */
+<span class="fc" id="L28">	SEVEN(5, &quot;7&quot;), /**</span>
+	 * Field EIGHT.
+	 */
+<span class="fc" id="L31">	EIGHT(6, &quot;8&quot;), /**</span>
+	 * Field NINE.
+	 */
+<span class="fc" id="L34">	NINE(7, &quot;9&quot;), /**</span>
+	 * Field TEN.
+	 */
+<span class="fc" id="L37">	TEN(8, &quot;10&quot;), /**</span>
+	 * Field JACK.
+	 */
+<span class="fc" id="L40">	JACK(9, &quot;J&quot;), /**</span>
+	 * Field QUEEN.
+	 */
+<span class="fc" id="L43">	QUEEN(10, &quot;Q&quot;), /**</span>
+	 * Field KING.
+	 */
+<span class="fc" id="L46">	KING(11, &quot;K&quot;), /**</span>
+	 * Field ACE.
+	 */
+<span class="fc" id="L49">	ACE(12, &quot;A&quot;);</span>
+
+	/**
+	 * Field index.
+	 */
+	private final int index;
+	/**
+	 * Field name.
+	 */
+	private final String name;
+
+	/**
+	 * Constructor for Rank.
+	 * 
+	 */
+<span class="fc" id="L64">	private Rank(int index, String name) {</span>
+<span class="fc" id="L65">		this.index = index;</span>
+<span class="fc" id="L66">		this.name = name;</span>
+<span class="fc" id="L67">	}</span>
+
+	/**
+	 * Method getName.
+	 * 
+	 */
+	String getName() {
+<span class="fc" id="L74">		return this.name;</span>
+	}
+
+	/**
+	 * Method getIndex.
+	 * 
+	 */
+	int getIndex() {
+<span class="fc" id="L82">		return this.index;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

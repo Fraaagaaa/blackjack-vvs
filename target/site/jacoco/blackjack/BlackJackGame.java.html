@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BlackJackGame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">blackjack-validation</a> &gt; <a href="index.source.html" class="el_package">blackjack</a> &gt; <span class="el_source">BlackJackGame.java</span></div><h1>BlackJackGame.java</h1><pre class="source lang-java linenums">package blackjack;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+
+/**
+ * This class implements the basic functionality of a BlackJack game.
+ * 
+ * 
+ * @author Janusz Slawek
+ * 
+ */
+public class BlackJackGame {
+	/**
+	 * Field BLACKJACK. (value is 21)
+	 */
+	private final static int BLACKJACK = 21;
+
+	/**
+	 * Field NOT_BUSTED. (value is 21). This field defines the maximal value of
+	 * a hand considered not busted.
+	 */
+	private final static int NOT_BUSTED = 21;
+
+	/**
+	 * Field MINIMAL_BET. (value is 1)
+	 */
+	private final static int MINIMAL_BET = 1;
+
+	/**
+	 * Field HUMAN_INITIAL_BALANCE. (value is 100)
+	 */
+	private final static int HUMAN_INITIAL_BALANCE = 100;
+
+	/**
+	 * Field DEALER_INITIAL_BALANCE. (value is 10000). That's how much a Player
+	 * has to win to break the bank.
+	 */
+	private final static int DEALER_INITIAL_BALANCE = 10000;
+
+	/**
+	 * Field dealer. The game will need one dealer to deal the cards. The
+	 * functions of a dealer and a casino-player are different. They are defined
+	 * in two different entities, i.e. IDealer and PlayerCPU.
+	 */
+	private IDealer dealer;
+
+	/**
+	 * Field banker. The game will need one banker to take care of bets. The
+	 * functions of a banker and a dealer are different. They are defined in two
+	 * different entities, i.e. IDealer and IBanker.
+	 */
+	private IBanker banker;
+
+	/**
+	 * Field soleCasino. There will be one casino-player. Casino player shares
+	 * some code with human-player, they both extend the same Player class.
+	 */
+	private PlayerCPU soleCasino;
+
+	/**
+	 * Field soleHuman. There will be one human-player.
+	 */
+	private PlayerHuman soleHuman;
+
+	/**
+	 * Field gameCount.
+	 */
+	private int gameCount;
+
+	/**
+	 * Field interruptGame.
+	 */
+	private boolean interruptGame;
+
+	/**
+	 * Field console.
+	 */
+	private BufferedReader console;
+
+	/**
+	 * Method main. This method runs the game and takes care of catching
+	 * exceptions, properly closing console. The game doesn't have any
+	 * command-line arguments.
+	 * 
+	 */
+	public static void main(String[] args) {
+<span class="fc" id="L91">		BlackJackGame game = new BlackJackGame();</span>
+		try {
+			try {
+<span class="fc" id="L94">				game.playGame();</span>
+<span class="nc" id="L95">			} catch (Exception e) {</span>
+<span class="nc" id="L96">				System.err.println(&quot;Game ended unexpectedly.&quot;);</span>
+<span class="nc" id="L97">				e.printStackTrace();</span>
+			} finally {
+<span class="fc" id="L99">				game.cleanUp();</span>
+			}
+<span class="nc" id="L101">		} catch (IOException e) {</span>
+<span class="nc" id="L102">			System.exit(1);</span>
+<span class="fc" id="L103">		}</span>
+<span class="fc" id="L104">	}</span>
+
+	/**
+	 * Constructor for BlackJackGame.
+	 * 
+	 */
+<span class="fc" id="L110">	public BlackJackGame() {</span>
+<span class="fc" id="L111">		this.console = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="fc" id="L112">		this.dealer = new Dealer(NOT_BUSTED);</span>
+<span class="fc" id="L113">		this.banker = (IBanker) this.dealer;</span>
+<span class="fc" id="L114">		this.soleCasino = new PlayerCPU(DEALER_INITIAL_BALANCE, MINIMAL_BET);</span>
+<span class="fc" id="L115">		this.soleHuman = new PlayerHuman(HUMAN_INITIAL_BALANCE, MINIMAL_BET,</span>
+				console);
+<span class="fc" id="L117">		this.gameCount = 0;</span>
+<span class="fc" id="L118">		this.interruptGame = false;</span>
+<span class="fc" id="L119">	}</span>
+
+	/**
+	 * 
+	 * This method will close console stream.
+	 * 
+	 * 
+	 * @throws IOException
+	 */
+	private void cleanUp() throws IOException {
+<span class="fc" id="L129">		this.console.close();</span>
+<span class="fc" id="L130">	}</span>
+
+	/**
+	 * 
+	 * This method implements the basic logic of the Black Jack game between two
+	 * players: casino-player and human-player.
+	 * 
+	 * Casino-player follows simple &quot;stand on 17&quot; rule.
+	 * 
+	 * Human-player will interact with user via console to determine actions:
+	 * 
+	 * HIT - player takes one card
+	 * 
+	 * SPLIT - player splits a hand into two separate hands
+	 * 
+	 * DOUBLE - player doubles the bet on a hand
+	 * 
+	 * STAND - player don't take any more actions
+	 * 
+	 * SURRENDER - player gives up half of the bet
+	 * 
+	 * Various actions might have further specific limitations.
+	 * 
+	 * The game will end if: a) any of the player runs out of money or b)
+	 * human-player quits the game.
+	 * 
+	 */
+	public void playGame() {
+<span class="fc bfc" id="L158" title="All 4 branches covered.">		while (!interruptGame &amp;&amp; soleHuman.getAccountBalance() &gt; 0</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">				&amp;&amp; soleCasino.getAccountBalance() &gt; 0) {</span>
+<span class="fc" id="L160">			gameCount++;</span>
+<span class="fc" id="L161">			System.out.println(&quot;Game &quot; + gameCount + &quot;.&quot;);</span>
+
+			/**
+			 * Shuffle the deck. It's unrealistic that the Dealer would shuffle
+			 * before each game, but otherwise in a one-on-one game with only
+			 * one deck it would be too easy for a Player to count the cards.
+			 */
+<span class="fc" id="L168">			dealer.shuffle();</span>
+
+			/**
+			 * Player makes initial bet
+			 */
+<span class="fc" id="L173">			System.out.println(&quot;Player's account: &quot;</span>
+<span class="fc" id="L174">					+ soleHuman.getAccountBalance() + &quot;.&quot;);</span>
+<span class="fc" id="L175">			soleHuman.bet(banker);</span>
+
+			/**
+			 * Initially deal two cards
+			 */
+<span class="fc" id="L180">			dealer.dealOneCard(soleHuman, Face.UP);</span>
+<span class="fc" id="L181">			dealer.dealOneCard(soleCasino, Face.UP);</span>
+<span class="fc" id="L182">			dealer.dealOneCard(soleHuman, Face.UP);</span>
+<span class="fc" id="L183">			dealer.dealOneCard(soleCasino, Face.DOWN);</span>
+
+			/**
+			 * Display Dealer's hand, i.e. one card face-up as rank and suit,
+			 * one card face-down as X.
+			 */
+<span class="fc" id="L189">			System.out.println(&quot;Dealer's hand: &quot; + soleCasino.getHand());</span>
+
+<span class="fc" id="L191">			Outcome result = null;</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">			if (soleCasino.getHand().getOptimalValue() == BLACKJACK) {</span>
+				/**
+				 * 
+				 * Dealer has a Black Jacks. Dealer must reveal cards. No more
+				 * cards will be dealt.
+				 * 
+				 */
+<span class="fc" id="L199">				soleCasino.revealHand();</span>
+<span class="fc" id="L200">				System.out.println(&quot;Player's hand &quot; + soleHuman.getHand());</span>
+<span class="fc" id="L201">				System.out.println(&quot;Dealer has a black jack. &quot;</span>
+<span class="fc" id="L202">						+ soleCasino.getHand());</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">				if (soleHuman.getHand().getOptimalValue() == BLACKJACK) {</span>
+<span class="fc" id="L204">					result = Outcome.TIE;</span>
+				} else {
+<span class="fc" id="L206">					result = Outcome.LOSE;</span>
+				}
+<span class="fc" id="L208">				banker.resolveBet(soleHuman, soleCasino, soleHuman.getHand(),</span>
+						result);
+<span class="fc" id="L210">				System.out.println(result + &quot;. Player's hand: &quot;</span>
+<span class="fc" id="L211">						+ soleHuman.getHand() + &quot; VS Dealer's hand: &quot;</span>
+<span class="fc" id="L212">						+ soleCasino.getHand()</span>
+
+				);
+			} else {
+				/**
+				 * 
+				 * Dealer doesn't have a Black Jack.
+				 * 
+				 */
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">				if (soleHuman.getHand().getOptimalValue() == BLACKJACK) {</span>
+					/**
+					 * 
+					 * Dealer peeked at the bottom card. Dealer doesn't have a
+					 * Black Jack but human does have a Black Jack. Dealer
+					 * doesn't reveal hand. Player wins.
+					 * 
+					 */
+<span class="fc" id="L229">					System.out.println(&quot;Player's hand &quot; + soleHuman.getHand()</span>
+							+ &quot;.&quot;);
+<span class="fc" id="L231">					System.out.println(&quot;Dealer doesn't have a black jack.&quot;);</span>
+<span class="fc" id="L232">					result = Outcome.WIN_BJ;</span>
+<span class="fc" id="L233">					banker.resolveBet(soleHuman, soleCasino,</span>
+<span class="fc" id="L234">							soleHuman.getHand(), result);</span>
+<span class="fc" id="L235">					System.out.println(result + &quot;. Player's hand: &quot;</span>
+<span class="fc" id="L236">							+ soleHuman.getHand() + &quot; VS Dealer's hand: &quot;</span>
+<span class="fc" id="L237">							+ soleCasino.getHand());</span>
+				} else {
+					/**
+					 * 
+					 * Dealer peeked at the bottom card. Dealer doesn't have a
+					 * Black Jack and knows that human doesn't have a Black Jack
+					 * either. Player will play. It might result in more than
+					 * one hand (if player splits).
+					 * 
+					 */
+<span class="nc" id="L247">					Collection&lt;Hand&gt; humanHands = soleHuman</span>
+<span class="nc" id="L248">							.play(dealer, banker);</span>
+
+					/**
+					 * 
+					 * Let's check if human offered any valid, i.e. not busted,
+					 * and not surrendered hands to play against. If human
+					 * busted or surrendered all hands then there's no point for
+					 * Dealer to play or even reveal a hand.
+					 * 
+					 */
+<span class="nc" id="L258">					boolean atLeastOneValidHand = false;</span>
+<span class="nc" id="L259">					for (Iterator&lt;Hand&gt; i = humanHands.iterator(); !atLeastOneValidHand</span>
+<span class="nc bnc" id="L260" title="All 4 branches missed.">							&amp;&amp; i.hasNext();) {</span>
+<span class="nc" id="L261">						Hand hand = i.next();</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">						if (hand.getValue() &lt;= NOT_BUSTED</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">								&amp;&amp; !hand.isSurrendered()) {</span>
+<span class="nc" id="L264">							atLeastOneValidHand = true;</span>
+						}
+<span class="nc" id="L266">					}</span>
+
+					/**
+					 * 
+					 * Human has at least one hand to compete against. Dealer
+					 * should reveal the initial hand, play, show the final
+					 * hand.
+					 * 
+					 */
+<span class="nc bnc" id="L275" title="All 2 branches missed.">					if (atLeastOneValidHand) {</span>
+<span class="nc" id="L276">						soleCasino.revealHand();</span>
+<span class="nc" id="L277">						System.out.println(&quot;Dealer's hand: &quot;</span>
+<span class="nc" id="L278">								+ soleCasino.getHand());</span>
+<span class="nc" id="L279">						soleCasino.play(dealer, banker);</span>
+<span class="nc" id="L280">						System.out.println(&quot;Dealer's hand finally: &quot;</span>
+<span class="nc" id="L281">								+ soleCasino.getHand());</span>
+					}
+
+<span class="nc bnc" id="L284" title="All 2 branches missed.">					for (Iterator&lt;Hand&gt; i = humanHands.iterator(); i.hasNext();) {</span>
+<span class="nc" id="L285">						Hand humanHand = i.next();</span>
+						/**
+						 * Check who won the game, casino-player or
+						 * human-player?
+						 * 
+						 */
+<span class="nc" id="L291">						result = banker.compareHands(humanHand,</span>
+<span class="nc" id="L292">								soleCasino.getHand());</span>
+						/**
+						 * Dealer resolves the bet
+						 * 
+						 */
+<span class="nc" id="L297">						banker.resolveBet(soleHuman, soleCasino, humanHand,</span>
+								result);
+
+<span class="nc" id="L300">						StringBuffer summary = new StringBuffer();</span>
+<span class="nc" id="L301">						summary.append(result + &quot;. Player's hand: &quot; + humanHand</span>
+<span class="nc" id="L302">								+ &quot; Value &quot; + humanHand.getOptimalValue() + &quot;.&quot;);</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">						if (humanHand.getValue() &lt;= 21) {</span>
+<span class="nc" id="L304">							summary.append(&quot; VS Dealer's hand: &quot;</span>
+<span class="nc" id="L305">									+ soleCasino.getHand() + &quot; Value &quot;</span>
+<span class="nc" id="L306">									+ soleCasino.getHand().getOptimalValue()</span>
+									+ &quot;.&quot;);
+						}
+<span class="nc" id="L309">						System.out.println(summary);</span>
+<span class="nc" id="L310">					}</span>
+				}
+			}
+
+			/**
+			 * Dealer collects cards from players
+			 * 
+			 */
+<span class="fc" id="L318">			dealer.collectCards(soleCasino.returnAllCards());</span>
+<span class="fc" id="L319">			dealer.collectCards(soleHuman.returnAllCards());</span>
+
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">			interruptGame = soleHuman.decideIfQuit()</span>
+<span class="pc bnc" id="L322" title="All 2 branches missed.">					|| soleCasino.decideIfQuit();</span>
+<span class="fc" id="L323">			System.out.println(&quot;&quot;);</span>
+<span class="fc" id="L324">		}</span>
+
+<span class="fc" id="L326">		System.out.println(&quot;\nThank you for the game. You've played &quot;</span>
+				+ gameCount + &quot; game(s). You started with &quot;
+				+ HUMAN_INITIAL_BALANCE + &quot;. You ended with &quot;
+<span class="fc" id="L329">				+ soleHuman.getAccountBalance() + &quot;.&quot;);</span>
+<span class="fc" id="L330">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

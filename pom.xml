@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.udc.vvs</groupId><artifactId>blackjack-validation</artifactId><version>1.0-SNAPSHOT</version>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <excludedTags>known-bug,performance</excludedTags><argLine/>
+  </properties>
+  <dependencies>
+    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.11.4</version><scope>test</scope></dependency>
+    <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>5.15.2</version><scope>test</scope></dependency>
+    <dependency><groupId>net.jqwik</groupId><artifactId>jqwik</artifactId><version>1.9.2</version><scope>test</scope></dependency>
+    <dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5</artifactId><version>1.3.0</version><scope>test</scope></dependency>
+  </dependencies>
+  <build>
+    <sourceDirectory>src</sourceDirectory><testSourceDirectory>test</testSourceDirectory>
+    <plugins>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.2</version><configuration><excludedGroups>${excludedTags}</excludedGroups><argLine>@{argLine} -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine><includes><include>**/*Test.java</include><include>**/*Properties.java</include></includes></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId><version>3.5.2</version><configuration><excludedGroups>${excludedTags}</excludedGroups><argLine>@{argLine} -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine></configuration><executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions></plugin>
+      <plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><version>0.8.12</version><executions><execution><goals><goal>prepare-agent</goal></goals></execution><execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution></executions></plugin>
+      <plugin><groupId>org.pitest</groupId><artifactId>pitest-maven</artifactId><version>1.17.3</version><dependencies><dependency><groupId>org.pitest</groupId><artifactId>pitest-junit5-plugin</artifactId><version>1.2.2</version></dependency></dependencies><configuration><targetClasses><param>blackjack.*</param></targetClasses><targetTests><param>blackjack.*Test</param><param>blackjack.*IT</param></targetTests><excludedTestClasses><param>blackjack.*DefectTest</param><param>blackjack.*PerformanceTest</param></excludedTestClasses><threads>2</threads><jvmArgs><param>-javaagent:${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar</param></jvmArgs><outputFormats><param>HTML</param><param>XML</param></outputFormats><timestampedReports>false</timestampedReports></configuration></plugin>
+      <plugin><groupId>com.github.spotbugs</groupId><artifactId>spotbugs-maven-plugin</artifactId><version>4.8.6.6</version><configuration><effort>Max</effort><threshold>Low</threshold><xmlOutput>true</xmlOutput></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-checkstyle-plugin</artifactId><version>3.6.0</version><configuration><configLocation>config/checkstyle.xml</configLocation><includeTestSourceDirectory>true</includeTestSourceDirectory><consoleOutput>false</consoleOutput><failOnViolation>false</failOnViolation></configuration></plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile><id>defects</id><properties><excludedTags>performance</excludedTags></properties></profile>
+    <profile><id>performance</id><properties><excludedTags>known-bug</excludedTags></properties></profile>
+  </profiles>
+</project>
