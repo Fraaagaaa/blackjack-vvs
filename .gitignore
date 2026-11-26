@@ -24,3 +24,6 @@
 # Registros de errores de Java
 hs_err_pid*
 replay_pid*
+
+*rubrica*
+docs/

@@ -1,9 +1,12 @@
 package blackjack;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -117,11 +120,36 @@ class DealerTest {
   }
 
   @Test
+  void collectionHidesEveryCard() {
+    Card first = new Card(Rank.ACE, Suit.CLUBS);
+    Card second = new Card(Rank.KING, Suit.HEARTS);
+    first.setFace(Face.UP);
+    second.setFace(Face.UP);
+    new Dealer(21).collectCards(List.of(first, second));
+    assertTrue(List.of(first, second).stream().allMatch(card -> card.getFace() == Face.DOWN));
+  }
+
+  @Test
+  void emptyCollectionIsAccepted() {
+    assertDoesNotThrow(() -> new Dealer(21).collectCards(List.of()));
+  }
+
+  @Test
   void shuffleDelegatesToDeck() {
     try (MockedConstruction<Deck> decks = mockConstruction(Deck.class)) {
       Dealer d = new Dealer(21);
       d.shuffle();
       verify(decks.constructed().get(0)).shuffle();
+    }
+  }
+
+  @Test
+  void repeatedShuffleDelegatesEveryTime() {
+    try (MockedConstruction<Deck> decks = mockConstruction(Deck.class)) {
+      Dealer d = new Dealer(21);
+      d.shuffle();
+      d.shuffle();
+      verify(decks.constructed().get(0), times(2)).shuffle();
     }
   }
 
@@ -165,6 +193,15 @@ class DealerTest {
     try (MockedConstruction<Deck> decks = mockConstruction(Deck.class)) {
       new Dealer(21).dealOneCard(h, Face.UP);
       verifyNoInteractions(h);
+    }
+  }
+
+  @Test
+  void emptyDeckDoesNotDealToPlayer() {
+    Player p = mock(Player.class);
+    try (MockedConstruction<Deck> decks = mockConstruction(Deck.class)) {
+      new Dealer(21).dealOneCard(p, Face.UP);
+      verifyNoInteractions(p);
     }
   }
 }

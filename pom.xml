@@ -64,7 +64,7 @@
 
                 <configuration>
                     <excludedGroups>${excludedTags}</excludedGroups>
-                    <argLine>@{argLine} -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine>
 
                     <includes>
                         <include>**/*Test.java</include>
@@ -80,7 +80,7 @@
 
                 <configuration>
                     <excludedGroups>${excludedTags}</excludedGroups>
-                    <argLine>@{argLine} -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -javaagent:"${settings.localRepository}/org/mockito/mockito-core/5.15.2/mockito-core-5.15.2.jar"</argLine>
                 </configuration>
 
                 <executions>
@@ -97,6 +97,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+
+                <configuration>
+                    <excludes>
+                        <exclude>*MockitoMock*</exclude>
+                    </excludes>
+                </configuration>
 
                 <executions>
                     <execution>
