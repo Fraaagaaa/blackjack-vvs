@@ -118,6 +118,65 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+
+                    <!--
+                        Java 27 does not allow System.exit(1) to be intercepted safely in-process.
+                        The only accepted misses are the IOException shutdown path at
+                        BlackJackGame.java:101-102 (three instructions across two lines).
+                    -->
+                    <execution>
+                        <id>coverage-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>MISSEDCOUNT</value>
+                                            <maximum>3</maximum>
+                                        </limit>
+
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.00</minimum>
+                                        </limit>
+
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>MISSEDCOUNT</value>
+                                            <maximum>2</maximum>
+                                        </limit>
+
+                                        <limit>
+                                            <counter>COMPLEXITY</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.00</minimum>
+                                        </limit>
+
+                                        <limit>
+                                            <counter>METHOD</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.00</minimum>
+                                        </limit>
+
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.00</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

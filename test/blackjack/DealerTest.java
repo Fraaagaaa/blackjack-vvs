@@ -204,4 +204,34 @@ class DealerTest {
       verifyNoInteractions(p);
     }
   }
+
+  @Test
+  void inconsistentNonEmptyDeckDoesNotDealNullToHand() {
+    Hand h = mock(Hand.class);
+    try (MockedConstruction<Deck> decks =
+        mockConstruction(
+            Deck.class,
+            (deck, context) -> {
+              when(deck.countElements()).thenReturn(1);
+              when(deck.takeOneFromTop()).thenReturn(null);
+            })) {
+      new Dealer(21).dealOneCard(h, Face.UP);
+      verifyNoInteractions(h);
+    }
+  }
+
+  @Test
+  void inconsistentNonEmptyDeckDoesNotDealNullToPlayer() {
+    Player p = mock(Player.class);
+    try (MockedConstruction<Deck> decks =
+        mockConstruction(
+            Deck.class,
+            (deck, context) -> {
+              when(deck.countElements()).thenReturn(1);
+              when(deck.takeOneFromTop()).thenReturn(null);
+            })) {
+      new Dealer(21).dealOneCard(p, Face.UP);
+      verifyNoInteractions(p);
+    }
+  }
 }

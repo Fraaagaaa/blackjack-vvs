@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
@@ -138,6 +139,113 @@ class PlayerHumanTest {
         mockConstruction(Hand.class, (h, c) -> when(h.isAllowedHit()).thenReturn(true))) {
       PlayerHuman p = new PlayerHuman(100, 1, input);
       assertThrows(RuntimeException.class, () -> p.play(mock(IDealer.class), mock(IBanker.class)));
+    }
+  }
+
+  @Test
+  void bustedHandOffersOnlyStand() {
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedHit()).thenReturn(true);
+              when(hand.isAllowedSplit()).thenReturn(true);
+              when(hand.isAllowedDouble()).thenReturn(true);
+              when(hand.isAllowedSurrender()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(22);
+            })) {
+      PlayerHuman player = new PlayerHuman(100, 1, input);
+      assertEquals(
+          List.of(player.getHand()), player.play(mock(IDealer.class), mock(IBanker.class)));
+    }
+  }
+
+  @Test
+  void unaffordableActionsOfferOnlyStand() {
+    IBanker banker = mock(IBanker.class);
+    when(banker.getBet(any(Hand.class))).thenReturn(2);
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedSplit()).thenReturn(true);
+              when(hand.isAllowedDouble()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(20);
+            })) {
+      PlayerHuman player = new PlayerHuman(1, 1, input);
+      assertEquals(List.of(player.getHand()), player.play(mock(IDealer.class), banker));
+    }
+  }
+
+  @Test
+  void splitLimitOffersOnlyStand() {
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedSplit()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(20);
+            })) {
+      PlayerHuman player = new PlayerHuman(100, 1, input);
+      player.nextHand();
+      player.nextHand();
+      player.nextHand();
+      assertEquals(
+          List.of(player.getHand()), player.play(mock(IDealer.class), mock(IBanker.class)));
+    }
+  }
+
+  @Test
+  void splitCanBeFirstOfferedAction() throws Exception {
+    ICard duplicate = mock(ICard.class);
+    when(input.readLine()).thenReturn("1");
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedSplit()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(20);
+              when(hand.getDuplicatedCards()).thenReturn(List.of(duplicate));
+            });
+        MockedConstruction<ActionSplit> actions =
+            mockConstruction(
+                ActionSplit.class,
+                (action, context) -> when(action.execute()).thenReturn(List.of()))) {
+      PlayerHuman player = new PlayerHuman(100, 1, input);
+      assertEquals(
+          List.of(player.getHand()), player.play(mock(IDealer.class), mock(IBanker.class)));
+    }
+  }
+
+  @Test
+  void doubleCanBeFirstOfferedAction() throws Exception {
+    when(input.readLine()).thenReturn("1");
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedDouble()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(20);
+            })) {
+      PlayerHuman player = new PlayerHuman(100, 1, input);
+      assertEquals(
+          List.of(player.getHand()), player.play(mock(IDealer.class), mock(IBanker.class)));
+    }
+  }
+
+  @Test
+  void surrenderCanBeFirstOfferedAction() throws Exception {
+    when(input.readLine()).thenReturn("1");
+    try (MockedConstruction<Hand> hands =
+        mockConstruction(
+            Hand.class,
+            (hand, context) -> {
+              when(hand.isAllowedSurrender()).thenReturn(true);
+              when(hand.getOptimalValue()).thenReturn(20);
+            })) {
+      PlayerHuman player = new PlayerHuman(100, 1, input);
+      assertEquals(
+          List.of(player.getHand()), player.play(mock(IDealer.class), mock(IBanker.class)));
     }
   }
 }

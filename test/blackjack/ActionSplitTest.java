@@ -69,6 +69,14 @@ class ActionSplitTest {
   }
 
   @Test
+  void splitAcesDisableFurtherHits() {
+    card = TestFixtures.card(Rank.ACE);
+    ready();
+    new ActionSplit(dealer, banker, original, card).execute();
+    verify(original).setAllowedHit(false);
+  }
+
+  @Test
   void deniedSplit() {
     assertTrue(new ActionSplit(dealer, banker, original, card).execute().isEmpty());
   }
