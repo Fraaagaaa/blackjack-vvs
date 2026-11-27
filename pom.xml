@@ -169,13 +169,24 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.8.6.6</version>
+                <version>4.10.5.0</version>
 
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
+                    <includeTests>false</includeTests>
                     <xmlOutput>true</xmlOutput>
                 </configuration>
+
+                <executions>
+                    <execution>
+                        <id>spotbugs-analysis</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>spotbugs</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

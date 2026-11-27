@@ -10,6 +10,34 @@ import org.junit.jupiter.api.Test;
 
 class HandDefectTest {
 
+  static class ConstructorDispatchProbe extends Hand {
+    int setterCalls;
+
+    ConstructorDispatchProbe() {
+      super(null, 0, true);
+    }
+
+    @Override
+    public void setAllowedHit(boolean allowed) {
+      setterCalls++;
+    }
+
+    @Override
+    public void setAllowedSplit(boolean allowed) {
+      setterCalls++;
+    }
+
+    @Override
+    public void setAllowedDouble(boolean allowed) {
+      setterCalls++;
+    }
+
+    @Override
+    public void setAllowedSurrender(boolean allowed) {
+      setterCalls++;
+    }
+  }
+
   @Test
   @Tag("known-bug")
   void BUG003_iteratorRemovalMustKeepAceScoreConsistent() {
@@ -29,5 +57,11 @@ class HandDefectTest {
     h.addElement(hidden);
     h.remove(hidden);
     assertTrue(h.isRevealed());
+  }
+
+  @Test
+  @Tag("known-bug")
+  void BUG006_constructorMustNotDispatchToOverridableSetters() {
+    assertEquals(0, new ConstructorDispatchProbe().setterCalls);
   }
 }
