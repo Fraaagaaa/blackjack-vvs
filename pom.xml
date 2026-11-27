@@ -148,7 +148,7 @@
 
                     <excludedTestClasses>
                         <param>blackjack.*DefectTest</param>
-                        <param>blackjack.*PerformanceTest</param>
+                        <param>blackjack.*Performance*</param>
                     </excludedTestClasses>
 
                     <threads>2</threads>

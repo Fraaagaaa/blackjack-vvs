@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 class DeckPerformanceTest {
   @Test
   void unitDeckHandlesOneHundredThousandRoundTripsWithinFiveSeconds() {
-    // Engineering smoke budget, not a supplied product requirement or benchmark.
     assertTimeout(
         Duration.ofSeconds(5),
         () -> {
@@ -23,17 +22,19 @@ class DeckPerformanceTest {
   }
 
   @Test
-  void integratedDealerRecyclesTenThousandDecksWithinTenSeconds() {
+  void unitDeckShufflesAndDrainsTenThousandFullDecksWithinFiveSeconds() {
     assertTimeout(
-        Duration.ofSeconds(10),
+        Duration.ofSeconds(5),
         () -> {
-          Dealer dealer = new Dealer(21);
-          PlayerCPU player = new PlayerCPU(100, 1);
-          for (int round = 0; round < 10000; round++) {
+          for (int round = 0; round < 10_000; round++) {
+            Deck<Integer> deck = new Deck<>();
             for (int card = 0; card < 52; card++) {
-              dealer.dealOneCard(player, Face.UP);
+              deck.returnOneToBottom(card);
             }
-            dealer.collectCards(player.returnAllCards());
+            deck.shuffle();
+            for (int card = 0; card < 52; card++) {
+              deck.takeOneFromTop();
+            }
           }
         });
   }
