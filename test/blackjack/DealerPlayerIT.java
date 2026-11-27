@@ -32,12 +32,21 @@ class DealerPlayerIT {
   }
 
   @Test
-  void doubleDebitsAndDeals() {
+  void doubleIncreasesRecordedBet() {
     PlayerCPU p = new PlayerCPU(100, 1);
     Dealer d = new Dealer(21);
     d.placeBet(p, p.getHand(), 10);
     new ActionDouble(d, d, p.getHand()).execute();
     assertEquals(20, d.getBet(p.getHand()));
+  }
+
+  @Test
+  void doubleDealsExactlyOneCard() {
+    PlayerCPU p = new PlayerCPU(100, 1);
+    Dealer d = new Dealer(21);
+    d.placeBet(p, p.getHand(), 10);
+    new ActionDouble(d, d, p.getHand()).execute();
+    assertEquals(1, p.getHand().countElements());
   }
 
   @Test
@@ -88,6 +97,16 @@ class DealerPlayerIT {
     d.dealOneCard(p, new Card(Rank.SIX, Suit.HEARTS), Face.UP);
     p.play(d, d);
     assertEquals(2, p.getHand().countElements());
+  }
+
+  @Test
+  void cpuHitsHardSixteenWithRealDealer() {
+    PlayerCPU p = new PlayerCPU(100, 1);
+    Dealer d = new Dealer(21);
+    d.dealOneCard(p, new Card(Rank.KING, Suit.HEARTS), Face.UP);
+    d.dealOneCard(p, new Card(Rank.SIX, Suit.CLUBS), Face.UP);
+    p.play(d, d);
+    assertEquals(3, p.getHand().countElements());
   }
 
   @Test
